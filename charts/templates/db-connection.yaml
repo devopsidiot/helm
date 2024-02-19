@@ -1,0 +1,21 @@
+{{- if .Values.preview.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Values.label }}-create-db"
+spec:
+  template:
+    spec:
+      containers:
+      - name: create-db
+        image: postgres:latest
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secretRef}}
+              key: DATABASE_PASSWORD
+        command: ["psql"]
+        args: ["-h", "{{ .Values.rds.clusterEndpoint }}", "-U", "{{ .Values.rds.username }}", "-d", "postgres", "-c", "CREATE DATABASE {{ .Values.rds.dbName }};"]
+      restartPolicy: Never
+{{- end }}
